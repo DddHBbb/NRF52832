@@ -91,13 +91,21 @@
 #define APP_BLE_CONN_CFG_TAG            1                                           /**< A tag identifying the SoftDevice BLE configuration. */
 
 //中文显示蓝牙名称，编码为           URL编码
-uint8_t DEVICE_NAME[]={0xe8,0xa5,0xbf,//西
-                       0xe5,0x8c,0xbb,//医
-                       0xe4,0xbb,0xbf,//仿
-                       0xe7,0x9c,0x9f,//真
-                       0x53,0x50,//SP
+//uint8_t DEVICE_NAME[]={0xe8,0xa5,0xbf,//西
+//                       0xe5,0x8c,0xbb,//医
+//                       0xe4,0xbb,0xbf,//仿
+//                       0xe7,0x9c,0x9f,//真
+//                       0x53,0x50,//SP
+//                       0x2d,0x30,0x30,0x30,0x30,//-0000
+//                       0x00};
+uint8_t DEVICE_NAME[]={0xe6,0xa8,0xa1,//模
+                       0xe6,0x8b,0x9f,//拟
+                       0xe5,0x90,0xac,//听
+                       0xe8,0xaf,0x8a,//诊
+                       0xe5,0x99,0xa8,//器
                        0x2d,0x30,0x30,0x30,0x30,//-0000
                        0x00};
+
 //#define DEVICE_NAME                     "TCM-Acupuncture-0001"                      /**< Name of device. Will be included in the advertising data. */
 //厂商名称
 #define MANUFACTURER_NAME               "TCML of Tellyes Scientific Inc."           /**< Manufacturer. Will be passed to Device Information Service. */
@@ -280,10 +288,10 @@ static void gap_params_init(void)
     }
 
     BLE_GAP_CONN_SEC_MODE_SET_OPEN(&sec_mode);
-    DEVICE_NAME[15]=res[2];
-    DEVICE_NAME[16]=res[3];
-    DEVICE_NAME[17]=res[0];
-    DEVICE_NAME[18]=res[1];
+    DEVICE_NAME[16]=res[2];
+    DEVICE_NAME[17]=res[3];
+    DEVICE_NAME[18]=res[0];
+    DEVICE_NAME[19]=res[1];
     err_code = sd_ble_gap_device_name_set(&sec_mode,
                                           (const uint8_t *) DEVICE_NAME,
                                           strlen(DEVICE_NAME));
@@ -736,18 +744,19 @@ void bsp_event_handler(bsp_event_t event)
  *          'new line' '\n' (hex 0x0A) or if the string has reached the maximum data length.
  */
 /**@snippet [Handling the data received over UART] */
+
 void uart_event_handle(app_uart_evt_t * p_event)
 {
-    static uint8_t data_array[BLE_NUS_MAX_DATA_LEN];
-    static uint16_t index = 0;
+static uint8_t data_array[BLE_NUS_MAX_DATA_LEN];
+static uint16_t index = 0;
 
     switch (p_event->evt_type)
     {
         case APP_UART_DATA_READY:
             UNUSED_VARIABLE(app_uart_get(&data_array[index]));
-            index++;
-
-            if((data_array[index - 1] == 0x0A) && (data_array[index - 2] == 0x0D))
+                index++;
+           
+           if((data_array[index - 1] == 0x0A) && (data_array[index - 2] == 0x0D))
             {
                 uint16_t length = index;
                 memcpy(&Recev_Buffer[Buffer_Offset],&data_array[0],index);
@@ -765,6 +774,7 @@ void uart_event_handle(app_uart_evt_t * p_event)
                 Buffer_Offset = 0;
                 index = 0;
             }
+
             break;
 
         case APP_UART_FIFO_ERROR:
@@ -793,7 +803,7 @@ static void uart_init(void)
         .flow_control = APP_UART_FLOW_CONTROL_DISABLED,
         .use_parity   = false,
 #if defined (UART_PRESENT)
-        .baud_rate    = NRF_UART_BAUDRATE_9600
+        .baud_rate    = NRF_UART_BAUDRATE_115200
 #else
         .baud_rate    = NRF_UARTE_BAUDRATE_115200
 #endif
@@ -1032,7 +1042,7 @@ int main(void)
     bool erase_bonds;
 
     // Initialize.
-    connected_flag_gpio_init();
+    connected_flag_gpio_init();//
     nrf_delay_ms(100);
     uart_init();
     log_init();
