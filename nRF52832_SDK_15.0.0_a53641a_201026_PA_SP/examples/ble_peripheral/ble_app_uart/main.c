@@ -351,12 +351,12 @@ static void nus_data_handler(ble_nus_evt_t * p_evt)
         //SoundName
         else if((p_evt->params.rx_data.p_data[0]=='S')&&(p_evt->params.rx_data.p_data[1]=='o'))
         {
-            uint8_t send_data[64]={"SoundName:"};
+            uint8_t send_data2[64]={"SoundName:"};
             uint8_t i=0;
 
             while(i<64)
             {
-                send_data[10+i] = p_evt->params.rx_data.p_data[10+i];
+                send_data2[10+i] = p_evt->params.rx_data.p_data[10+i];
                 if(p_evt->params.rx_data.p_data[10+i]=='\n') 
                 {
                   break;
@@ -369,9 +369,31 @@ static void nus_data_handler(ble_nus_evt_t * p_evt)
 
             for (uint8_t j = 0; j < (i+11); j++)
             {
-                app_uart_put(send_data[j]);
+                app_uart_put(send_data2[j]);
             }
         }   
+        else if((p_evt->params.rx_data.p_data[0]=='P')&&(p_evt->params.rx_data.p_data[1]=='l'))
+        {
+            uint8_t send_data3[64]={"PlayCommand:"};//12
+            uint8_t i=0;
+
+            while(i<64)
+            {
+                send_data3[12+i] = p_evt->params.rx_data.p_data[12+i];
+                if(p_evt->params.rx_data.p_data[12+i]=='\n') 
+                {
+                  break;
+                }
+                else
+                {
+                  i++;
+                }
+            }
+            for (uint8_t j = 0; j < (i+13); j++)
+            {
+                app_uart_put(send_data3[j]);
+            }
+        }
     }
 }
 
@@ -749,6 +771,8 @@ void uart_event_handle(app_uart_evt_t * p_event)
 {
 static uint8_t data_array[BLE_NUS_MAX_DATA_LEN];
 static uint16_t index = 0;
+static char abuff[3]={0};
+uint8_t  i=0;
 
     switch (p_event->evt_type)
     {
@@ -769,8 +793,21 @@ static uint16_t index = 0;
                 {
                     ble_nus_position_send(&sound_nus, Recev_Buffer, &length, m_conn_handle);
                 }
+                else if((Recev_Buffer[0]=='B')&&(Recev_Buffer[1]=='a'))
+                {
+                    while(1)
+                    {
+                      if(Recev_Buffer[i+13] == '\r')
+                        break;
+
+                       abuff[i] = Recev_Buffer[i+13];                     
+                       i++;
+                    }
+                   battery_level = atoi(abuff);
+                }
                 
                 memset(Recev_Buffer,0,sizeof(Recev_Buffer));
+   //             memset(abuff,0,sizeof(abuff));
                 Buffer_Offset = 0;
                 index = 0;
             }
