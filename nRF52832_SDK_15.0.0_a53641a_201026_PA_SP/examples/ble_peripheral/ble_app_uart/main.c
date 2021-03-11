@@ -579,10 +579,11 @@ static void on_adv_evt(ble_adv_evt_t ble_adv_evt)
  * @param[in]   p_ble_evt   Bluetooth stack event.
  * @param[in]   p_context   Unused.
  */
+
+ uint8_t BTS[]="BTe\r\n";//e为可选状态
 static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
 {
     uint32_t err_code;
-    uint8_t BTS[]="BTe\r\n";//e为可选状态
     
     switch (p_ble_evt->header.evt_id)
     {
@@ -595,10 +596,7 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
             APP_ERROR_CHECK(err_code);
             ioset_connected();
             BTS[2]='C';
-            for(int i=0;i<sizeof(BTS);i++)
-            {
-              app_uart_put(BTS[i]);
-            }
+
             break;
 
         case BLE_GAP_EVT_DISCONNECTED:
@@ -607,10 +605,7 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
             m_conn_handle = BLE_CONN_HANDLE_INVALID;
             ioset_disconnected();
             BTS[2]='D';
-            for(int i=0;i<sizeof(BTS);i++)
-            {
-              app_uart_put(BTS[i]);
-            }
+
             break;
 
         case BLE_GAP_EVT_DATA_LENGTH_UPDATE_REQUEST:
@@ -1106,6 +1101,11 @@ int main(void)
     // Enter main loop.
     for (;;)
     {
+          for(int i=0;i<sizeof(BTS);i++)
+            {
+              app_uart_put(BTS[i]);
+            }
+        nrf_delay_ms(1000);
         idle_state_handle();
     }
 }
