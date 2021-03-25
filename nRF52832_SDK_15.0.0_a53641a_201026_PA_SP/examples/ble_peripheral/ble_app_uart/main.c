@@ -271,7 +271,7 @@ static void gap_params_init(void)
     unsigned char res[12];
 
     sd_ble_gap_addr_get(&mac_addr);
-    HexToAscii(&mac_addr.addr,res,strlen(mac_addr.addr));
+    HexToAscii((uint8_t *)&mac_addr.addr,res,strlen(mac_addr.addr));
     NRF_LOG_INFO("MAC:%x-%x-%x-%x-%x-%x",mac_addr.addr[0],mac_addr.addr[1],mac_addr.addr[2],mac_addr.addr[3],mac_addr.addr[4],mac_addr.addr[5]);
  //   NRF_LOG_INFO("MAC2:%c%c%c%c%c%c\n",res[0],res[1],res[2],res[3],res[4],res[5]);
  //   NRF_LOG_INFO("MAC3:%s\n",res);
@@ -799,6 +799,10 @@ uint8_t  i=0;
                        i++;
                     }
                    battery_level = atoi(abuff);
+                }
+                else if((Recev_Buffer[0]=='P')&&(Recev_Buffer[1]=='l'))
+                {
+                  ble_nus_position_send(&sound_nus, Recev_Buffer, &length, m_conn_handle);
                 }
                 
                 memset(Recev_Buffer,0,sizeof(Recev_Buffer));
