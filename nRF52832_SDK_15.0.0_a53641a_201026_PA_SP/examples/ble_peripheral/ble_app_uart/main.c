@@ -596,7 +596,10 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
             APP_ERROR_CHECK(err_code);
             ioset_connected();
             BTS[2]='C';
-
+            for(int i=0;i<sizeof(BTS);i++)
+              {
+                app_uart_put(BTS[i]);
+              }
             break;
 
         case BLE_GAP_EVT_DISCONNECTED:
@@ -605,7 +608,10 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
             m_conn_handle = BLE_CONN_HANDLE_INVALID;
             ioset_disconnected();
             BTS[2]='D';
-
+            for(int i=0;i<sizeof(BTS);i++)
+              {
+                app_uart_put(BTS[i]);
+              }
             break;
 
         case BLE_GAP_EVT_DATA_LENGTH_UPDATE_REQUEST:
@@ -803,6 +809,14 @@ uint8_t  i=0;
                 else if((Recev_Buffer[0]=='P')&&(Recev_Buffer[1]=='l'))
                 {
                   ble_nus_position_send(&sound_nus, Recev_Buffer, &length, m_conn_handle);
+                }
+                else if((Recev_Buffer[0]=='C')&&(Recev_Buffer[1]=='B'))
+                {
+                   for(int i=0;i<sizeof(BTS);i++)
+                      {
+                        nrf_delay_ms(200);//不加延时单片机无法接受
+                        app_uart_put(BTS[i]);
+                      }
                 }
                 
                 memset(Recev_Buffer,0,sizeof(Recev_Buffer));
@@ -1105,11 +1119,11 @@ int main(void)
     // Enter main loop.
     for (;;)
     {
-          for(int i=0;i<sizeof(BTS);i++)
-            {
-              app_uart_put(BTS[i]);
-            }
-        nrf_delay_ms(1000);
+          //  for(int i=0;i<sizeof(BTS);i++)
+          //    {
+          //      app_uart_put(BTS[i]);
+          //    }
+          //nrf_delay_ms(1500);
         idle_state_handle();
     }
 }
